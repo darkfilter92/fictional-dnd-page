@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Party Upgrade Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals & Muted Sage -->
+    <!-- Application Structure Plan: A tab-based single-page application. The main navigation consists of buttons for each character class and a final "Party Combos" section. Clicking a character tab reveals their specific guide. This structure was chosen for speed and ease of use, allowing players to quickly access a specific character's information without scrolling through a long document. Recommendations within each character view are presented as accordions, keeping the interface clean and allowing users to expand only the details they need. This interactive, non-linear approach is superior to a static document for at-a-glance referencing during a game. -->
+    <!-- Visualization & Content Choices: Report Info: Character classes and abilities. -> Goal: Inform/Organize. -> Viz/Presentation Method: Tabbed navigation for main sections, and interactive accordions for detailed recommendations. Unicode characters (emojis) are used for thematic icons. A new "Explain Spell ✨" button next to each spell name uses the Gemini API to generate a brief explanation. -> Interaction: Users click tabs to switch between character guides and click accordion headers to expand/collapse detailed explanations. Clicking the spell explanation button dynamically fetches and displays LLM-generated text. -> Justification: This design prioritizes information hierarchy and scannability, prevents cognitive overload by hiding detailed text until it's requested, and adds dynamic content generation via LLMs to enhance understanding. Library/Method: Vanilla JavaScript for all interactions, Tailwind CSS for styling, Gemini API for LLM spell explanations. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .tab-active {
+            background-color: #344e41;
+            color: #ffffff;
+        }
+        .tab-inactive {
+            background-color: #e2e8f0;
+            color: #334155;
+        }
+        .accordion-header::after {
+            content: '\25BC';
+            float: right;
+            transition: transform 0.2s ease-in-out;
+        }
+        .accordion-header.open::after {
+            transform: rotate(180deg);
+        }
+        .spell-explanation-box {
+            background-color: #ecf3f0;
+            border-left: 4px solid #4f8a8b;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            color: #2d3748;
+            font-size: 0.875rem;
+            border-radius: 0.25rem;
+        }
+        .loading-indicator {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(0,0,0,.2);
+            border-radius: 50%;
+            border-top-color: #344e41;
+            animation: spin 1s ease-in-out infinite;
+            -webkit-animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { -webkit-transform: rotate(360deg); }
+        }
+        @-webkit-keyframes spin {
+            to { -webkit-transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">Party Upgrade Guide</h1>
+            <p class="text-slate-600 mt-2">Key Features & Optimal Choices for Your Party</p>
+        </header>
+
+        <nav id="main-nav" class="flex flex-wrap justify-center gap-2 mb-8">
+            <button data-tab="paladin" class="nav-tab tab-active py-2 px-4 rounded-full font-semibold transition-colors duration-200">🐉 Paladin</button>
+            <button data-tab="warlock" class="nav-tab tab-inactive py-2 px-4 rounded-full font-semibold transition-colors duration-200">👹 Warlock</button>
+            <button data-tab="caster" class="nav-tab tab-inactive py-2 px-4 rounded-full font-semibold transition-colors duration-200">🌿 Druid</button>
+            <button data-tab="rogue" class="nav-tab tab-inactive py-2 px-4 rounded-full font-semibold transition-colors duration-200">⚙️ Rogue</button>
+            <button data-tab="synergy" class="nav-tab tab-inactive py-2 px-4 rounded-full font-semibold transition-colors duration-200">🎯 Synergy & Tips</button>
+        </nav>
+
+        <main id="content-container">
+
+            <!-- Paladin Content -->
+            <div id="paladin-content" class="tab-content space-y-6">
+                <div class="p-6 bg-white rounded-2xl shadow-sm border border-gray-200">
+                    <h2 class="text-2xl font-bold mb-4">🐉 Dragonborn Paladin</h2>
+                    <p class="mb-4 text-slate-600">Explore the optimal choices for your Paladin at different levels.</p>
+                    
+                    <div class="accordion-item mb-6">
+                        <button class="accordion-header w-full text-left p-4 bg-slate-100 rounded-lg font-semibold text-slate-800 focus:outline-none">Role Recommendation</button>
+                        <div class="accordion-content hidden p-4 border-t border-slate-200">
+                            <h4 class="font-semibold mb-2">Frontline Defender & Support</h4>
+                            <p class="text-slate-600">As a Paladin, your place is at the front of the battle. With heavy armor proficiency, you can absorb hits for the party. Your main contributions are dealing significant single-target damage with <strong>Divine Smite</strong> and providing crucial support through <strong>Lay on Hands</strong> and buffing spells like <strong>Bless</strong>.</p>
+                        </div>
+                    </div>
+
+                    <!-- Level 2 Upgrade Checklist -->
+                    <div class="accordion-item mb-6">
+                        <button class="accordion-header open w-full text-left p-4 bg-green-100 rounded-lg font-semibold text-green-800 focus:outline-none">Level 2 Upgrade Checklist</button>
+                        <div class="accordion-content p-4 border-t border-green-200">
+                            <ol class="list-decimal list-inside space-y-3 text-slate-700">
+                                <li><strong>Increase Hit Points (HP):</strong> Roll your d10 Hit Die (or take the average of 6) and add your Constitution modifier. Add the total to your maximum HP.</li>
+                                <li><strong>Choose a Fighting Style:</strong> Pick one style to define your combat approach. Popular choices include <strong>Defense</strong> (+1 AC), <strong>Dueling</strong> (+2 damage with a one-handed weapon), or <strong>Great Weapon Fighting</strong> (reroll 1s and 2s on damage with a two-handed weapon).</li>
+                                <li><strong>Gain Spellcasting & Divine Smite:</strong> You now have two 1st-level spell slots. Your key new feature is <strong>Divine Smite</strong>: when you hit with a melee attack, you can expend a spell slot to deal an extra 2d8 radiant damage.</li>
+                                <li><strong>Prepare Spells:</strong> You can prepare a number of 1st-level spells equal to <strong>1 + your Charisma modifier</strong>. See the list below for your options.</li>
+                                <li><strong>Update Your Character Sheet:</strong>
+                                    <ul class="list-disc list-inside ml-4 mt-1 text-slate-600">
+                                        <li>Update your max HP.</li>
+                                        <li>Add your chosen Fighting Style and "Divine Smite" to your features.</li>
+                                        <li>Note your two 1st-level spell slots.</li>
+                                        <li>List your prepared spells.</li>
+                                        <li>Your <strong>Lay on Hands</strong> pool increases to 10 (Level x 5).</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- Level 1 Paladin Content -->
+                    <h3 class="text-xl font-semibold mb-2 text-slate-700">Level 1 Features:</h3>
+                    <ul class="list-disc list-inside space-y-1 text-slate-600 mb-6">
+                        <li><strong>Proficiencies:</strong> All armor, shields, simple and martial weapons.</li>
+                        <li><strong>Divine Sense:</strong> Detect celestials, fiends, and undead.</li>
+                        <li><strong>Lay on Hands:</strong> A pool of 5 hit points for healing (action).</li>
+                    </ul>
+                    
+                    <!-- Level 2 Paladin Content -->
+                    <h3 class="text-xl font-semibold mb-2 text-slate-700 mt-8">Level 2 Features:</h3>
+                    <ul class="list-disc list-inside space-y-1 text-slate-600 mb-6">
+                        <li><strong>Fighting Style:</strong> Choose a specialized combat style.</li>
+                        <li><strong>Spellcasting:</strong> Access to 2 level 1 spell slots.</li>
+                        <li><strong>Divine Smite:</strong> Convert spell slots to +2d8 radiant damage on hit.</li>
+                    </ul>
+                    <div class="space-y-3">
+                        <div class="accordion-item">
+                            <button class="accordion-header w-full text-left p-4 bg-slate-100 rounded-lg font-semibold text-slate-800 focus:outline-none">Available 1st-Level Paladin Spells</button>
+                            <div class="accordion-content hidden p-4 border-t border-slate-200">
+                                <p class="text-slate-600 mb-2">Paladins prepare spells equal to their Charisma modifier + half Paladin level (rounded down). At Level 2, with a likely +2 or +3 CHA modifier, you can prepare 3-4 spells from the following list:</p>
+                                <ul class="list-disc list-inside space-y-1 text-slate-600">
+                                    <li>Bless <button class="explain-spell-btn text-xs text-blue-600 ml-1 hover:underline" data-spell="Bless (Paladin 5e)">Explain Spell ✨</button></li>
+                                    <li>Command <button class="explain-spell-btn text-xs text-blue-600 ml-1 hover:underline" data-spell="Command (Paladin 5e)">Explain Spell ✨</button></li>
+                                    <li>Cure Wounds <button class="explain-spell-btn text-xs text-blue-600 ml-1 hover:underline" data-spell="Cure Wounds (Paladin 5e)">Explain Spell ✨</button></li>
+                                    <li>Divine Favor <button class="explain-spell-btn text-xs text-blue-600 ml-1 hover:underline" data-spell="Divine Favor (Paladin 5e)">Explain Spell ✨</button></li>
+                                    <li>Shield of Faith <button class="explain-spell-btn text-xs text-blue-600 ml-1 hover:underline" data-spell="Shield of Faith (Paladin 5e)">Explain Spell ✨</button></li>
+                                    <li>Wrathful Smite <button class="explain-spell-btn text-xs text-blue-600 ml-1 hover:underline" data-spell="Wrathful Smite (Paladin 5e)">Explain Spell ✨</button></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warlock Content -->
+            <div id="warlock-content" class="tab-content space-y-6 hidden">
+                <div class="p-6 bg-white rounded-2xl shadow-sm border border-gray-200">
+                    <h2 class="text-2xl font-bold mb-4">👹 Tiefling Warlock</h2>
+                    <p class="mb-4 text-slate-600">Explore the optimal choices for your Warlock at different levels.</p>
+                    
+                    <div class="accordion-item mb-6">
+                        <button class="accordion-header w-full text-left p-4 bg-slate-100 rounded-lg font-semibold text-slate-800 focus:outline-none">Role Recommendation</button>
+                        <div class="accordion-content hidden p-4 border-t border-slate-200">
+                            <h4 class="font-semibold mb-2">Ranged Damage & Controller</h4>
+                            <p class="text-slate-600">Your Warlock excels at dealing consistent damage from a distance using <strong>Eldritch Blast</strong>. With invocations like <strong>Agonizing Blast</strong> and <strong>Repelling Blast</strong>, you not only hurt enemies but also control their position on the battlefield. Your spell slots, which refresh on a short rest, should be saved for high-impact spells like <strong>Hex</strong> or utility.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Level 2 Upgrade Checklist -->
+                    <div class="accordion-item mb-6">
+                        <button class="accordion-header open w-full text-left p-4 bg-green-100 rounded-lg font-semibold text-green-800 focus:outline-none">Level 2 Upgrade Checklist</button>
+                        <div class="accordion-content p-4 border-t border-green-200">
+                            <ol class="list-decimal list-inside space-y-3 text-slate-700">
+                                <li><strong>Increase Hit Points (HP):</strong> Roll your d8 Hit Die (or take the average of 5) and add your Constitution modifier. Add the total to your maximum HP.</li>
+                                <li><strong>Choose Eldritch Invocations:</strong> You gain two invocations. These are powerful magical secrets. We strongly recommend <strong>Agonizing Blast</strong> (add your Charisma modifier to Eldritch Blast damage) and <strong>Repelling Blast</strong> (push enemies 10ft with Eldritch Blast).</li>
+                                <li><strong>Gain a Spell Slot & New Spell:</strong> You now have two 1st-level spell slots that recharge on a short rest. You also learn one new 1st-level Warlock spell of your choice.</li>
+                                <li><strong>Update Your Character Sheet:</strong>
+                                    <ul class="list-disc list-inside ml-4 mt-1 text-slate-600">
+                                        <li>Update your max HP.</li>
+                                        <li>Add your two chosen Eldritch Invocations to your features list.</li>
+                                        <li>Note your two 1st-level spell slots.</li>
+                                        <li>Add your new spell to your list of known spells.</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- Level 1 Warlock Content -->
+                    <h3 class="text-xl font-semibold mb-2 text-slate-700">Level 1 Features:</h3>
+                    <ul class="list-disc list-inside space-y-1 text-slate-600 mb-6">
+                        <li><strong>Pact Magic:</strong> Regain spell slots on a short rest.</li>
+                        <li><strong>Otherworldly Patron:</strong> Choose your patron (e.g., The Fiend, The Great Old One).</li>
+                    </ul>
+                    
+                    <!-- Level 2 Warlock Content -->
+                    <h3 class="text-xl font-semibold mb-2 text-slate-700 mt-8">Level 2 Features:</h3>
+                    <ul class="list-disc list-inside space-y-1 text-slate-600 mb-6">
+                        <li><strong>Eldritch Invocations:</strong> Pick two powerful customizations.</li>
+                        <li><strong>Extra Spell Slot:</strong> Now have two spell slots per short rest.</li>
+                    </ul>
+                    <div class="space-y-3">
+                         <div class="accordion-item">
+                            <button class="accordion-header w-full text-left p-4 bg-slate-100 rounded-lg font-semibold text-slate-800 focus:outline-none">Available 1st-Level Warlock Spells</button>
+                            <div class="accordion-content hidden p-4 border-t border-slate-200">
+                                <p class="text-slate-600 mb-2">As a Warlock, you know a set number of spells. At Level 1, you know two 1st-level spells from the list below:</p>
+                                <ul class="list-disc list-inside space-y-1 text-slate-600">
+                                    <li>Armor of Agathys <button class="explain-spell-btn text-xs text-blue-600 ml-1 hover:underline" data-spell="Armor of Agathys 5e">Explain Spell ✨</button></li>
+                                    <li>Arms of Hadar <button class="explain-spell-btn text-xs text-blue-600 ml-1 hover:underline" data-spell="Arms of Hadar 5e">Explain Spell ✨</button></li>
+                                    <li>Charm Person <button class="explain-spell-btn text-xs text-blue-600 ml-1 hover:underline" data-spell="Charm Person 5e">Explain Spell ✨</button></li>
+                                    <li>Hellish Rebuke <button class="explain-spell-btn text-xs text-blue-600 ml-1 hover:underline" data-spell="Hellish Rebuke 5e">Explain Spell ✨</button></li>
+                                    <li>Hex <button class="explain-spell-btn text-xs text-blue-600 ml-1 hover:underline" data-spell="Hex 5e">Explain Spell ✨</button></li>
+                                    <li>Protection from Evil and Good <button class="explain-spell-btn text-xs text-blue-600 ml-1 hover:underline" data-spell="Protection from Evil and Good 5e">Explain Spell ✨</button></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header w-full text-left p-4 bg-slate-100 rounded-lg font-semibold text-slate-800 focus:outline-none">Level 2: Optimal Invocations</button>
+                            <div class="accordion-content hidden p-4 border-t border-slate-200">
+                                <h4 class="font-semibold mb-2">Optimal Invocations: <em class="font-normal">Agonizing Blast, Repelling Blast</em></h4>
+                                <p class="text-slate-600"><strong>Agonizing Blast:</strong> Adds your Charisma modifier to Eldritch Blast damage, making it a consistently powerful cantrip.<br><br><strong>Repelling Blast:</strong> Allows you to push a target 10 feet away on hit, excellent for battlefield control.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Caster (Druid ONLY) Content -->
+            <div id="caster-content" class="tab-content space-y-6 hidden">
+                <div class="p-6 bg-white rounded-2xl shadow-sm border border-gray-200">
+                    <h2 class="text-2xl font-bold mb-4">🌿 Druid Path</h2>
+                    <p class="mb-4 text-slate-600">The party's nature-infused spellcaster, providing powerful support and control options.</p>
+                    
+                    <div class="accordion-item mb-6">
+                        <button class="accordion-header w-full text-left p-4 bg-slate-100 rounded-lg font-semibold text-slate-800 focus:outline-none">Role Recommendation</button>
+                        <div class="accordion-content hidden p-4 border-t border-slate-200">
+                           <h4 class="font-semibold mb-2">Versatile Support & Scout</h4>
+                            <p class="text-slate-600">The Druid is a jack-of-all-trades. Your primary role is to
